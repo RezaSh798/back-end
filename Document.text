@@ -1,0 +1,20 @@
+HELLO
+
+1.To access product routes, you must first log in, and your role must be admin!!
+
+2.To register a product, you must first call the specified router to upload the photo,
+ then request the specified router to create the product.
+ so :
+ upload route: products/uploads/image
+ create route: products/
+
+3.To update a product, you must first call the specified router to upload the new photo,
+ then request the specified router to update the product.
+ so :
+ upload update route: products/uploads/update/image/:id
+ update route: products/:id
+
+
+<<<<ATTENTION>>>>
+If you do not want to edit the product photo, just request the specified route to edit the product.
+<<<<ATTENTION>>>>

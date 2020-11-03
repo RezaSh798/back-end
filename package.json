@@ -1,0 +1,19 @@
+{
+  "name": "coffeeshop",
+  "version": "1.0.0",
+  "description": "This is my first back-end project with express",
+  "main": "app.js",
+  "scripts": {
+    "serve": "nodemon app"
+  },
+  "author": "RezaSh798",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.11",
+    "multer": "^1.4.2",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0"
+  }
+}
