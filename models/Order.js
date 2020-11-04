@@ -18,6 +18,10 @@ const orderSchema = new Schema({
         count: {
             type: Number,
             require: true
+        },
+        date: {
+            type: String,
+            dafault: new Date()
         }
     }]
 });
