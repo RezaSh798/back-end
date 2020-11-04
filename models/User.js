@@ -22,6 +22,10 @@ const userSchema = new Schema({
         type: String,
         default: 'member'
     },
+    factors: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Order'
+    }],
     date: {
         type: String,
         default: new Date()

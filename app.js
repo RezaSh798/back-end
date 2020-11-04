@@ -17,6 +17,7 @@ mongoos.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
 app.use(express.static('public'));
 
 // BodyParser
+app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 // Middleware
@@ -31,6 +32,6 @@ const {rolAuth} = require('./config/auth');
 app.use('/api/v1/users', require('./routes/api/v1/users'));
 app.use('/api/v1/products', rolAuth, require('./routes/api/v1/products'));
 app.use('/api/v1/cats', rolAuth, require('./routes/api/v1/categories'));
-// app.use('/api/v1/orders', require('./routes/api/v1/orders'));
+app.use('/api/v1/orders', require('./routes/api/v1/orders'));
 
 app.listen(port, () => console.log(`Server is running at ${port}`));

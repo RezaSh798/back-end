@@ -4,22 +4,24 @@ const bcrypt = require('bcryptjs');
 module.exports = {
     getUsers: (req, res) => {
         User.find()
-        .then(users => {
-            res.json({users});
-        })
-        .catch(err => console.log(err));
+        .populate('factors')
+        .exec((err, users) => {
+            if(err) throw(err);
+            res.json(users);
+        });
     },
     getUser: (req, res) => {
         User.findOne({_id: req.params.id})
-        .then(user => {
+        .populate('factors')
+        .exec((err, user) => {
+            if(err) throw(err);
             if(!user) {
-                res.status(404).json({message: `کاربری با id:${req.params.id} پیدا نشد!`})
+                res.status(404).json({message: `کاربری با id:${req.params.id} پیدا نشد!`});
             }
             else {
-                res.status(200).json({user});
+                res.status(200).json(user);
             }
         })
-        .catch(err => console.log(err));
     },
     newUser: (req, res) => {
         const user = req.body;
