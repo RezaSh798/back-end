@@ -3,22 +3,24 @@ const Category = require('../models/Category');
 module.exports = {
     getCategories: (req, res) => {
         Category.find()
-        .then(cats => {
-            res.status(200).json(cats);
-        })
-        .catch(err => console.log(err));
+        .populate('products')
+        .exec((err, categories) => {
+            if(err) throw(err);
+            res.status(200).json(categories);
+        });
     },
     getCategory: (req, res) => {
         Category.findOne({_id: req.params.id})
-        .then(cat => {
-            if(!cat) {
+        .populate('products')
+        .exec((err, category) => {
+            if(err) throw(err);
+            if(!category) {
                 res.status(404).json({message: `دسته بندی با id:${req.params.id} پیدا نشد!`});
             }
             else {
-                res.status(200).json(cat);
+                res.status(200).json(category);
             }
         })
-        .catch(err => console.log(err));
     },
     newCategody: (req, res) => {
         const category = req.body;
