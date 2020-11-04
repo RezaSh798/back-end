@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Category = require('../models/Category');
 
 // Start upload image config
 const multer = require('multer');
@@ -7,7 +8,6 @@ const fs = require('fs');
 var storage = multer.diskStorage({
     destination: 'public/uploads',
     filename: (req, file, cb) => {
-        const time = new Date();
         cb(null, myFileName(file));
     }
 });
@@ -30,7 +30,7 @@ function myFileName(file) {
 // Upload method
 var upload = multer({
     storage: storage,
-    limits: {fileSize: 1000000},
+    limits: {fileSize: 2000000},
     fileFilter: (req, file, cb) => {
         checkFileType(file, cb);
     }
@@ -52,22 +52,24 @@ function checkFileType(file, cb) {
 module.exports = {
     getProducts: (req, res) => {
         Product.find()
-        .then(products => {
-            res.status(200).json({products});
-        })
-        .catch(err => console.log(err));
+        .populate('category')
+        .exec((err, products) => {
+            if(err) throw(err);
+            res.status(200).json(products);
+        });
     },
     getProduct: (req, res) => {
         Product.findOne({_id: req.params.id})
-        .then(product => {
+        .populate('category')
+        .exec((err, product) => {
+            if(err) throw(err);
             if(!product) {
                 res.status(404).json({message: `محصولی با id:${req.params.id} پیدا نشد!`});
             }
             else {
-                res.status(200).json({product});
+                res.status(200).json(product);
             }
-        })
-        .catch(err => console.log(err));
+        });
     },
     newProduct: (req, res) => {
         const product = req.body;
@@ -82,32 +84,70 @@ module.exports = {
             res.status(500).json(errors);
         }
         else {
-            const newProduct = Product({
+            Product.create({
                 title: product.title,
                 description: product.description,
                 body: product.body,
                 price: product.price,
-                category: product.categoryId,
-                image: 'public/uploads/' + imageName,
-            });
-            
-            newProduct.save()
-            .then(() => {
-                res.status(201).json({message: 'محصول با موفقیت ثبت گردید!'})
+                category: product.category,
+                image: imageName ? 'public/uploads/' + imageName : '',
+            })
+            .then(async product => {
+                await Category.updateOne(
+                    {_id: product.category},
+                    {$push: {products: product._id}}
+                );
+                imageName = '';
+                res.status(201).json({message: 'محصول با موفقیت ثبت گردید!'});
             })
             .catch(err => console.log(err));
         }
     },
     updateProduct: (req, res) => {
-        Product.updateOne({_id: req.params.id}, req.body)
+        Product.findOne({_id: req.params.id})
         .then(product => {
             if(!product) {
                 res.json({message: `محصولی با id:${req.params.id} پیدا نشد!`});
             }
-            else {
-                res.json({message: `محصول با id:${req.params.id} با موفقیت بروزرسانی شد!`});
+            else if(req.body.category && (product.category != req.body.category)) {
+                Category.updateOne(
+                    {_id: product.category},
+                    {$pull: {products: product._id}}
+                )
+                .then(() => {
+                    Product.updateOne({_id: req.params.id}, {
+                        title: req.body.title,
+                        description: req.body.description,
+                        body: req.body.body,
+                        price: req.body.price,
+                        category: req.body.category,
+                        image: imageName ? 'public/uploads/' + imageName : '',
+                    })
+                    .then(async () => {
+                        await Category.updateOne(
+                            {_id: req.body.category},
+                            {$push: {products: req.params.id}}
+                        );
+                        imageName = '';
+                        res.json({message: `محصول با id:${req.params.id} با موفقیت بروزرسانی شد!`});
+                    });
+                })
+                .catch(err => console.log(err));
             }
-        });
+            else {
+                Product.updateOne({_id: req.params.id}, {
+                    title: req.body.title,
+                    description: req.body.description,
+                    body: req.body.body,
+                    price: req.body.price,
+                    image: imageName ? 'public/uploads/' + imageName : '',
+                })
+                .then(() => {
+                    imageName = '';
+                    res.json({message: `محصول با id:${req.params.id} با موفقیت بروزرسانی شد!`});
+                });
+            }
+        })
     },
     deleteProduct: (req, res) => {
         Product.findOne({_id: req.params.id})
@@ -116,8 +156,15 @@ module.exports = {
                 res.json({message: `محصولی با id:${req.params.id} پیدا نشد!`});
             }
             else {
-                product.delete();
-                res.json({message: `محصول با id:${req.params.id} با موفقیت حذف شد!`});
+                Category.updateOne(
+                    {_id: product.category},
+                    {$pull: {products: product._id}}
+                )
+                .then(() => {
+                    product.deleteOne();
+                    res.json({message: `محصول با id:${req.params.id} با موفقیت حذف شد!`});
+                })
+                .catch(err => console.log(err));
             }
         })
         .catch(err => console.log(err));

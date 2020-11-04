@@ -16,19 +16,19 @@ const productSchema =  new Schema({
     },
     price: {
         type: Number,
-        default: ''
+        default: 0
     },
     image: {
         type: String,
-        require: true
+        default: ''
     },
-    category: [{
+    category: {
         type: Schema.Types.ObjectId,
         ref: 'Category'
-    }],
+    },
     date: {
         type: String,
-        default: new Date(),
+        default: new Date()
     }
 });
 
