@@ -11,7 +11,7 @@ router.route('/:id')
     .put(ProductController.updateProduct)
     .delete(ProductController.deleteProduct);
 
-router.route('/uploads/image')
+router.route('/upload/image')
     .post(ProductController.UploadImage);
 
 router.route('/update/image')

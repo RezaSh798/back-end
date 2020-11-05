@@ -4,6 +4,7 @@
   "description": "This is my first back-end project with express",
   "main": "app.js",
   "scripts": {
+    "start": "node app",
     "serve": "nodemon app"
   },
   "author": "RezaSh798",
